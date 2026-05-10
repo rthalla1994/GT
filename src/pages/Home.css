@@ -1,0 +1,104 @@
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.welcome-section h2 {
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.welcome-section p {
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+.timings-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+}
+
+.icon {
+  color: var(--accent-gold);
+}
+
+.timings-card ul {
+  list-style: none;
+}
+
+.timings-card li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timings-card li:last-child {
+  border-bottom: none;
+}
+
+.timing-name {
+  font-weight: 500;
+}
+
+.timing-time {
+  opacity: 0.7;
+}
+
+.notifications-section h3 {
+  margin-bottom: 16px;
+  color: var(--primary-color);
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-card {
+  display: flex;
+  gap: 16px;
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.notification-icon {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-top: 4px;
+}
+
+.notification-content p {
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.notification-date {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
