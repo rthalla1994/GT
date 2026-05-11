@@ -4,7 +4,7 @@ import './App.css';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 
-import loaderImage from './assets/temple-loader.jpg';
+import loaderImage from './assets/temple-loader.jpeg';
 import templeBell from './assets/temple-bell.mp3';
 
 function App() {
