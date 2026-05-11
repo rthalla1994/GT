@@ -83,6 +83,35 @@ const Home = () => {
           ))}
         </div>
       </section>
+      <section className="card map-section">
+        <h3>Temple Location</h3>
+
+        <p className="map-text">
+          Visit Sri Kunti Gangamma Temple during the Jathara celebrations.
+        </p>
+
+        <div className="map-container">
+          <iframe
+            title="Temple Location"
+            src="https://maps.app.goo.gl/MCUSmmM1zy3Weonu8"
+            width="100%"
+            height="250"
+            style={{ border: 0 }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+
+        <a
+          href="https://maps.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="map-btn"
+        >
+          Open in Google Maps
+        </a>
+      </section>
     </div>
   );
 };

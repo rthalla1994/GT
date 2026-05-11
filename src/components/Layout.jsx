@@ -30,7 +30,7 @@ const Layout = () => {
           </NavLink>
         </nav>
         <div className="watermark">
-          Design and developed by Ravi Thalla using AI
+          Design and developed by Ravi Thalla
         </div>
       </footer>
     </>
