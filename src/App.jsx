@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
+import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
+import Donations from './pages/Donations';
 
 import loaderImage from './assets/temple-loader.jpeg';
 import templeBell from './assets/temple-bell.mp3';
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
-    // Play bell sound
     const audio = new Audio(templeBell);
 
     audio.volume = 0.5;
 
     audio.play().catch(() => {
-      console.log('Autoplay blocked by browser');
+      console.log('Autoplay blocked');
     });
 
-    // Hide splash screen after 3 seconds
     const timer = setTimeout(() => {
       setLoading(false);
     }, 3000);
@@ -28,6 +29,7 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Splash Screen
   if (loading) {
     return (
       <div className="splash-screen">
@@ -57,9 +59,21 @@ function App() {
   }
 
   return (
-    <div>
-      <Home />
-      <Gallery />
+    <div className="app-container">
+      {/* Navbar / Tabs */}
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      {/* Page Content */}
+      <main className="main-content">
+        {activeTab === 'home' && <Home />}
+
+        {activeTab === 'gallery' && <Gallery />}
+
+        {activeTab === 'donations' && <Donations />}
+      </main>
     </div>
   );
 }
