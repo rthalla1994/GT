@@ -126,9 +126,27 @@ const Donations = () => {
   };
 
   // =========================
-  // TOTAL
+  // TOTALS
   // =========================
   const totalAmount = donors.reduce((sum, d) => sum + Number(d.amount), 0);
+
+  const totalPaidAmount = donors
+    .filter(d => d.status === "paid")
+    .reduce((sum, d) => sum + Number(d.amount), 0);
+
+  const totalPendingAmount = donors
+    .filter(d => d.status === "pending")
+    .reduce((sum, d) => sum + Number(d.amount), 0);
+
+  const halfKgMuttonCount = donors.filter(d => {
+    const amt = Number(d.amount);
+    return amt >= 1116 && amt <= 3000;
+  }).length;
+
+  const oneKgMuttonCount = donors.filter(d => {
+    const amt = Number(d.amount);
+    return amt > 3000;
+  }).length;
 
   // =========================
   // EXCEL EXPORT
@@ -154,7 +172,7 @@ const Donations = () => {
   };
 
   // =========================
-  // PDF RECEIPT (WITH SIGNATURE)
+  // PDF RECEIPT
   // =========================
   const generateReceipt = async (donor) => {
     const pdf = new jsPDF("p", "mm", "a4");
@@ -177,7 +195,6 @@ const Donations = () => {
     if (amount > 3000) muttonMessage = "Eligible for 1 KG Mutton";
     else if (amount >= 1116) muttonMessage = "Eligible for 1/2 KG Mutton";
 
-    // HEADER
     pdf.setFillColor(255, 245, 235);
     pdf.rect(0, 0, 210, 40, "F");
 
@@ -193,7 +210,6 @@ const Donations = () => {
     pdf.setFontSize(9);
     pdf.text(`Receipt No: ${receiptNo}`, 190, 10, { align: "right" });
 
-    // DETAILS
     pdf.roundedRect(15, 50, 180, 110, 3, 3);
 
     pdf.setFontSize(11);
@@ -204,13 +220,11 @@ const Donations = () => {
 
     pdf.text(`Mutton Benefit: ${muttonMessage}`, 20, 120);
 
-    // THANK YOU
     pdf.setFillColor(255, 250, 240);
     pdf.roundedRect(15, 165, 180, 25, 3, 3, "F");
 
     pdf.text("Thank you for your contribution", 105, 180, { align: "center" });
 
-    // SIGNATURE
     pdf.text("Authorized Signature", 150, 225);
     pdf.line(140, 228, 190, 228);
     pdf.addImage(signature, "PNG", 145, 232, 40, 18);
@@ -218,9 +232,6 @@ const Donations = () => {
     pdf.save(`receipt_${donor.name}.pdf`);
   };
 
-  // =========================
-  // UI (FULL RESTORED)
-  // =========================
   return (
     <div className="donations-container fade-in">
 
@@ -229,13 +240,46 @@ const Donations = () => {
         <p>Sri Kunti Gangamma Jathara Contributions</p>
       </div>
 
+      {/* TOTAL */}
+      {/* TOTAL DONATIONS */}
       <div className="total-card">
         <FaHandHoldingHeart className="total-icon" />
         <div>
           <p>Total Donations</p>
-          <h1>₹ {totalAmount.toLocaleString()}</h1>
+          <h1>₹ {Number(totalAmount || 0).toLocaleString()}</h1>
         </div>
       </div>
+
+      {/* PUBLIC SUMMARY (OUTSIDE ADMIN) */}
+      <section className="visitor-card">
+
+        <div className="visitor-card">
+          <p>Total Paid</p>
+          <h2>₹ {Number(totalPaidAmount || 0).toLocaleString()}</h2>
+        </div>
+
+        <div className="visitor-card">
+          <p>Total Pending</p>
+          <h2>₹ {Number(totalPendingAmount || 0).toLocaleString()}</h2>
+        </div>
+      </section>
+
+      {/* ADMIN SUMMARY */}
+      {isAdmin && (
+        <section className="visitor-card">
+
+          <div className="visitor-card">
+            <p>1/2 KG Mutton</p>
+            <h2>{halfKgMuttonCount}</h2>
+          </div>
+
+          <div className="visitor-card">
+            <p>1 KG Mutton</p>
+            <h2>{oneKgMuttonCount}</h2>
+          </div>
+
+        </section>
+      )}
 
       <div style={{ display: "flex", gap: 10 }}>
         {!isAdmin && (
@@ -245,14 +289,13 @@ const Donations = () => {
         )}
 
         {isAdmin && (
-          <>
-            <button className="admin-btn" onClick={exportToExcel}>
-              Export Excel
-            </button>
-          </>
+          <button className="admin-btn" onClick={exportToExcel}>
+            Export Excel
+          </button>
         )}
       </div>
 
+      {/* FORM */}
       {isAdmin && (
         <div className="donor-form-card">
           <h3>{editingId ? "Edit Donor" : "Add Donor"}</h3>
@@ -271,6 +314,7 @@ const Donations = () => {
         </div>
       )}
 
+      {/* TABLE */}
       <div className="donor-table-card">
         <h3>Donor List ({donors.length})</h3>
 
@@ -303,15 +347,18 @@ const Donations = () => {
                   {d.status === "paid" ? (
                     <button onClick={() => generateReceipt(d)}>
                       <FaFilePdf />
-                    </button>) : (<span className="status-badge pending">Pending</span>)}
+                    </button>
+                  ) : (
+                    <span className="status-badge pending">Pending</span>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
 
+      {/* ADMIN MODAL */}
       {showAdminModal && (
         <div className="modal-overlay">
           <div className="modal-content">
