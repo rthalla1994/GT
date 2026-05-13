@@ -14,19 +14,40 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
-    const audio = new Audio(templeBell);
+    const playBell = () => {
+      const audio = new Audio(templeBell);
 
-    audio.volume = 0.5;
+      audio.volume = 0.5;
 
-    audio.play().catch(() => {
-      console.log('Autoplay blocked');
-    });
+      audio.play().catch((err) => {
+        console.log(err);
+      });
 
+      // Optional vibration for mobile
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      // Remove listeners after first interaction
+      document.removeEventListener('click', playBell);
+      document.removeEventListener('touchstart', playBell);
+    };
+
+    // Play on first interaction anywhere
+    document.addEventListener('click', playBell);
+    document.addEventListener('touchstart', playBell);
+
+    // Splash screen timer
     const timer = setTimeout(() => {
       setLoading(false);
     }, 3000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+
+      document.removeEventListener('click', playBell);
+      document.removeEventListener('touchstart', playBell);
+    };
   }, []);
 
   // Splash Screen

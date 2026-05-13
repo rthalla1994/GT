@@ -23,18 +23,43 @@ const Home = () => {
     },
     {
       id: 4,
+      text: "Annadanam (Food Distribution) will be organized for all devotees at 1:00 PM.",
+      date: "20th May 2026",
+      icon: <FaBell />
+    },
+    {
+      id: 5,
       text: "Special Goddess Decoration and Band Procession from 5:00 PM.",
       date: "20th May 2026",
       icon: <FaCalendarAlt />
-    },
+    }
   ];
 
   const timings = [
-    { name: "Temple Ritual", time: "7:00 PM" },
-    { name: "Abhishekam & Harathi", time: "7:30 PM" },
-    { name: "Pongallu", time: "4:00 PM" },
-    { name: "Procession", time: "7:00 PM" },
-    { name: "Band Procession", time: "5:00 PM" },
+    {
+      name: "19th May - Temple Ritual",
+      time: "7:00 PM"
+    },
+    {
+      name: "19th May - Abhishekam & Harathi",
+      time: "7:30 PM"
+    },
+    {
+      name: "19th May - Pongallu",
+      time: "4:00 PM"
+    },
+    {
+      name: "19th May - Ammavari Procession",
+      time: "7:00 PM"
+    },
+    {
+      name: "20th May - Goddess Decoration",
+      time: "Morning"
+    },
+    {
+      name: "20th May - Band Procession",
+      time: "5:00 PM"
+    }
   ];
 
   return (
@@ -93,7 +118,7 @@ const Home = () => {
         <div className="map-container">
           <iframe
             title="Temple Location"
-            src="https://maps.app.goo.gl/MCUSmmM1zy3Weonu8"
+            src="https://www.google.com/maps?q=Sri%20Kunti%20Gangamma%20Temple&output=embed"
             width="100%"
             height="250"
             style={{ border: 0 }}
@@ -104,7 +129,7 @@ const Home = () => {
         </div>
 
         <a
-          href="https://maps.google.com"
+          href="https://maps.app.goo.gl/MCUSmmM1zy3Weonu8"
           target="_blank"
           rel="noopener noreferrer"
           className="map-btn"
