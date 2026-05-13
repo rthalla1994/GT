@@ -171,7 +171,13 @@ const Home = () => {
 
       {/* Welcome */}
       <section className="welcome-section">
-
+        <div className="temple-logo-wrapper">
+          <img
+            src="/temple-logo.png"
+            alt="Temple Logo"
+            className="temple-logo"
+          />
+        </div>
         <h2>
           Welcome Devotees
         </h2>

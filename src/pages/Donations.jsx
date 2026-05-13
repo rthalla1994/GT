@@ -1,64 +1,33 @@
 import { useEffect, useState } from 'react';
-
 import {
-  FaMobileAlt,
   FaHandHoldingHeart,
   FaLock,
   FaTimes,
   FaEdit,
-  FaTrash
+  FaTrash,
+  FaFilePdf
 } from 'react-icons/fa';
 
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
+} from 'firebase/firestore';
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+
+import { db } from "../firebase";
 import './Donations.css';
 
 const Donations = () => {
-
-  const initialDonors = [
-    { id: 1, name: "Yugandar Naidu", amount: 20001, status: "paid" },
-    { id: 2, name: "T Govind", amount: 10116, status: "paid" },
-    { id: 3, name: "T Reddeppa", amount: 11011, status: "paid" },
-    { id: 4, name: "Mohan devendra", amount: 1116, status: "pending" },
-    { id: 5, name: "Nobul Kumar", amount: 2116, status: "pending" },
-    { id: 6, name: "Gnanendra", amount: 5116, status: "pending" },
-    { id: 7, name: "Hema Naidu", amount: 5116, status: "pending" },
-    { id: 8, name: "Ravi Thalla", amount: 7777, status: "pending" },
-    { id: 9, name: "Venkatesulu", amount: 2222, status: "paid" },
-    { id: 10, name: "Chakravarthy", amount: 2116, status: "paid" },
-    { id: 11, name: "Bhanu", amount: 1116, status: "paid" },
-    { id: 12, name: "K Vedavathi", amount: 1116, status: "paid" },
-    { id: 13, name: "Sreenu", amount: 1116, status: "pending" },
-    { id: 14, name: "Haribabu", amount: 1116, status: "pending" },
-    { id: 15, name: "Surendra", amount: 1116, status: "pending" },
-    { id: 16, name: "Devandra", amount: 1116, status: "pending" },
-    { id: 17, name: "Hemadri", amount: 1116, status: "pending" },
-    { id: 18, name: "Uday", amount: 1116, status: "pending" },
-    { id: 19, name: "Prakash", amount: 2116, status: "paid" },
-    { id: 20, name: "Mahesh", amount: 1116, status: "pending" },
-    { id: 21, name: "Kumaraswamy", amount: 1116, status: "pending" },
-    { id: 22, name: "Krishnaiah", amount: 2116, status: "pending" },
-    { id: 23, name: "Chandu", amount: 1116, status: "pending" },
-    { id: 24, name: "MudduSwamy", amount: 2116, status: "pending" },
-    { id: 25, name: "Rajamanikyam", amount: 5116, status: "pending" },
-    { id: 26, name: "Gowramma", amount: 1116, status: "paid" },
-    { id: 27, name: "J Venkatesh", amount: 1116, status: "pending" },
-    { id: 28, name: "J Ramadevi", amount: 1116, status: "paid" },
-    { id: 29, name: "J Vijaya", amount: 1116, status: "pending" },
-    { id: 30, name: "J Sunil", amount: 1116, status: "pending" },
-    { id: 31, name: "J Subramanyam", amount: 1116, status: "pending" },
-    { id: 32, name: "J SadhaSiva", amount: 1116, status: "pending" },
-    { id: 33, name: "Indrani", amount: 1116, status: "pending" },
-    { id: 34, name: "T Anand", amount: 1116, status: "pending" },
-    { id: 35, name: "Mohan Reddy", amount: 1116, status: "paid" },
-    { id: 36, name: "V Ashok Kumar", amount: 1116, status: "paid" },
-    { id: 37, name: "Krishnaveni", amount: 1116, status: "pending" },
-    { id: 38, name: "Kalyani", amount: 1116, status: "pending" },
-    { id: 39, name: "Om Prakash", amount: 1116, status: "paid" },
-    { id: 40, name: "T Subramanyam", amount: 1116, status: "pending" },
-    { id: 41, name: "B Damodharam", amount: 1116, status: "pending" },
-    { id: 42, name: "M Subramanyam", amount: 1116, status: "pending" },
-    { id: 43, name: "M Munirajulu", amount: 1116, status: "pending" },
-    { id: 44, name: "V Devarajulu", amount: 1116, status: "pending" },
-  ];
 
   const [donors, setDonors] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -72,137 +41,85 @@ const Donations = () => {
     status: 'paid',
   });
 
-  // LOAD DONORS
+  // =========================
+  // FIRESTORE REALTIME
+  // =========================
   useEffect(() => {
+    const q = query(
+      collection(db, "donors"),
+      orderBy("createdAt", "desc")
+    );
 
-    try {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
-      const savedDonors =
-        localStorage.getItem('templeDonors');
+      setDonors(data);
+    });
 
-      if (savedDonors) {
-
-        const parsed =
-          JSON.parse(savedDonors);
-
-        setDonors(parsed);
-
-      } else {
-
-        localStorage.setItem(
-          'templeDonors',
-          JSON.stringify(initialDonors)
-        );
-
-        setDonors(initialDonors);
-      }
-
-    } catch (error) {
-
-      console.log(error);
-
-      setDonors(initialDonors);
-    }
-
+    return () => unsubscribe();
   }, []);
 
-  // SAVE DONORS
-  useEffect(() => {
-
-    if (donors.length > 0) {
-
-      localStorage.setItem(
-        'templeDonors',
-        JSON.stringify(donors)
-      );
-    }
-
-  }, [donors]);
-
+  // =========================
   // ADMIN LOGIN
+  // =========================
   const handleAdminLogin = (e) => {
-
     e.preventDefault();
 
     if (passcode === '7082') {
-
       setIsAdmin(true);
-
       setShowAdminModal(false);
-
       setPasscode('');
-
     } else {
-
       alert('Incorrect passcode');
     }
   };
 
-  // INPUT CHANGE
+  // =========================
+  // INPUT
+  // =========================
   const handleChange = (e) => {
-
     const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ADD / UPDATE
-  const handleSubmit = (e) => {
-
+  // =========================
+  // ADD / UPDATE FIRESTORE
+  // =========================
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.amount) {
-      return;
-    }
+    if (!formData.name || !formData.amount) return;
 
-    // UPDATE
     if (editingId) {
+      const ref = doc(db, "donors", editingId);
 
-      const updatedDonors = donors.map((donor) =>
-        donor.id === editingId
-          ? {
-            ...donor,
-            name: formData.name,
-            amount: Number(formData.amount),
-            status: formData.status,
-          }
-          : donor
-      );
-
-      setDonors(updatedDonors);
+      await updateDoc(ref, {
+        name: formData.name,
+        amount: Number(formData.amount),
+        status: formData.status
+      });
 
       setEditingId(null);
 
-      alert('Donor updated successfully');
-
     } else {
-
-      // ADD
-      const newDonor = {
-        id: Date.now(),
+      await addDoc(collection(db, "donors"), {
         name: formData.name,
         amount: Number(formData.amount),
         status: formData.status,
-      };
-
-      setDonors([newDonor, ...donors]);
-
-      alert('Donor added successfully');
+        createdAt: serverTimestamp()
+      });
     }
 
-    setFormData({
-      name: '',
-      amount: '',
-      status: 'paid',
-    });
+    setFormData({ name: '', amount: '', status: 'paid' });
   };
 
+  // =========================
   // EDIT
+  // =========================
   const handleEdit = (donor) => {
-
     setEditingId(donor.id);
 
     setFormData({
@@ -211,165 +128,232 @@ const Donations = () => {
       status: donor.status,
     });
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // =========================
   // DELETE
-  const handleDelete = (id) => {
-
-    const confirmDelete =
-      window.confirm(
-        'Are you sure you want to delete this donor?'
-      );
-
-    if (!confirmDelete) return;
-
-    const updatedDonors =
-      donors.filter(
-        (donor) => donor.id !== id
-      );
-
-    setDonors(updatedDonors);
-
-    alert('Donor deleted successfully');
+  // =========================
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure?")) return;
+    await deleteDoc(doc(db, "donors", id));
   };
 
-  // CANCEL EDIT
-  const cancelEdit = () => {
-
-    setEditingId(null);
-
-    setFormData({
-      name: '',
-      amount: '',
-      status: 'paid',
-    });
-  };
-
+  // =========================
   // TOTAL
+  // =========================
   const totalAmount = donors.reduce(
-    (sum, donor) =>
-      sum + Number(donor.amount),
+    (sum, d) => sum + Number(d.amount),
     0
   );
 
-  return (
+  // =========================
+  // EXCEL EXPORT
+  // =========================
+  const exportToExcel = () => {
+    const data = donors.map(d => ({
+      Name: d.name,
+      Amount: d.amount,
+      Status: d.status
+    }));
 
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(wb, ws, "Donors");
+
+    const buffer = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "array"
+    });
+
+    const blob = new Blob([buffer], {
+      type: "application/octet-stream"
+    });
+
+    saveAs(blob, `donors_${Date.now()}.xlsx`);
+  };
+
+  // =========================
+  // PDF RECEIPT (NEW)
+  // =========================
+  const generateReceipt = async (donor) => {
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    pdf.setFont("helvetica", "normal");
+
+    // HARD RESET AREA (prevents ghost text overlap issues)
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, 210, 297, "F");
+
+    const logoUrl = "/temple-logo.png";
+    const receiptNo = `RCPT-${Date.now()}`;
+
+    const loadImage = (src) =>
+      new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = src;
+        img.onload = () => resolve(img);
+      });
+
+    const logo = await loadImage(logoUrl);
+
+    // =========================
+    // MUTTON RULE LOGIC
+    // =========================
+    const amount = Number(donor.amount);
+
+    let muttonMessage = "No mutton benefit";
+
+    if (amount > 3000) {
+      muttonMessage = "Eligible for 1 KG Mutton";
+    } else if (amount > 1116 && amount <= 3000) {
+      muttonMessage = "Eligible for 1/2 KG Mutton";
+    }
+    pdf.setLineHeightFactor(1.2);
+    pdf.setCharSpace(0);
+
+    // =========================
+    // HEADER
+    // =========================
+    pdf.setFillColor(255, 245, 235);
+    pdf.rect(0, 0, 210, 40, "F");
+
+    pdf.addImage(logo, "PNG", 15, 8, 22, 22);
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.text("Sri Kunti Gangamma Temple Committee", 105, 18, { align: "center" });
+
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Donation Receipt", 105, 26, { align: "center" });
+
+    pdf.setFontSize(9);
+    pdf.text(`Receipt No: ${receiptNo}`, 190, 10, { align: "right" });
+
+    // =========================
+    // DETAILS BOX
+    // =========================
+    pdf.setDrawColor(200);
+    pdf.roundedRect(15, 50, 180, 110, 3, 3);
+
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Donor Details", 20, 62);
+
+    pdf.setFont("helvetica", "normal");
+
+    pdf.text("Name:", 20, 75);
+    pdf.text(`${donor.name}`, 70, 75);
+
+    pdf.text("Amount:", 20, 85);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(`₹ ${String(amount.toLocaleString())}`, 70, 85);
+
+    pdf.text("Status:", 20, 95);
+    pdf.text(`${donor.status.toUpperCase()}`, 70, 95);
+
+    pdf.text("Date:", 20, 105);
+    pdf.text(`${new Date().toLocaleString()}`, 70, 105);
+
+    // =========================
+    // MUTTON SECTION (NEW)
+    // =========================
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Mutton Benefit:", 20, 120);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.text(muttonMessage, 70, 120);
+
+    // =========================
+    // THANK YOU BOX
+    // =========================
+    pdf.setFillColor(255, 250, 240);
+    pdf.roundedRect(15, 165, 180, 25, 3, 3, "F");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.text(
+      "Thank you for your generous contribution to the temple.",
+      105,
+      180,
+      { align: "center" }
+    );
+
+    // =========================
+    // SIGNATURE
+    // =========================
+    pdf.setFont("normal");
+    pdf.text("Authorized Signature", 155, 230);
+    pdf.line(140, 225, 190, 225);
+
+    // =========================
+    // FOOTER
+    // =========================
+    pdf.setFontSize(9);
+    pdf.text(
+      "This is a computer generated receipt.",
+      105,
+      280,
+      { align: "center" }
+    );
+
+    pdf.save(`receipt_${donor.name}.pdf`);
+  };
+
+  return (
     <div className="donations-container fade-in">
 
       {/* HEADER */}
       <div className="donations-header">
-
         <h2>Temple Donations</h2>
-
-        <p>
-          Your generous support helps us organize
-          Sri Kunti Gangamma Jathara celebrations.
-        </p>
-
+        <p>Sri Kunti Gangamma Jathara Contributions</p>
       </div>
 
       {/* TOTAL */}
       <div className="total-card">
-
         <FaHandHoldingHeart className="total-icon" />
-
         <div>
-
           <p>Total Donations</p>
-
-          <h1>
-            ₹ {totalAmount.toLocaleString()}
-          </h1>
-
+          <h1>₹ {totalAmount.toLocaleString()}</h1>
         </div>
-
       </div>
 
-      {/* WALLET */}
-      <div className="wallet-card">
+      {/* ADMIN */}
+      <div style={{ display: "flex", gap: 10 }}>
+        {!isAdmin && (
+          <button className="admin-btn" onClick={() => setShowAdminModal(true)}>
+            <FaLock /> Admin Login
+          </button>
+        )}
 
-        <div className="wallet-header">
-
-          <FaMobileAlt className="wallet-icon" />
-
-          <h3>Mobile Wallet / UPI</h3>
-
-        </div>
-
-        <div className="wallet-details">
-
-          <p>
-            <strong>Name:</strong> Govind
-          </p>
-
-          <p>
-            <strong>Phone:</strong> 9908747361
-          </p>
-
-          <p className="upi-box">
-            dikshithhethvik@okhdfcbank
-          </p>
-
-          <p className="wallet-note">
-            Use Google Pay, PhonePe,
-            Paytm or any UPI app.
-          </p>
-
-        </div>
-
+        {isAdmin && (
+          <button className="admin-btn" onClick={exportToExcel}>
+            Export Excel
+          </button>
+        )}
       </div>
 
-      {/* ADMIN LOGIN */}
-      {!isAdmin && (
-
-        <button
-          className="admin-btn"
-          onClick={() =>
-            setShowAdminModal(true)
-          }
-        >
-
-          <FaLock />
-
-          Admin Login
-
-        </button>
-      )}
-
-      {/* ADMIN FORM */}
+      {/* FORM */}
       {isAdmin && (
-
         <div className="donor-form-card">
+          <h3>{editingId ? 'Edit Donor' : 'Add Donor'}</h3>
 
-          <h3>
-            {editingId
-              ? 'Edit Donor'
-              : 'Add Donor'}
-          </h3>
-
-          <form
-            onSubmit={handleSubmit}
-            className="donor-form"
-          >
+          <form onSubmit={handleSubmit} className="donor-form">
 
             <input
-              type="text"
               name="name"
-              placeholder="Donor Name"
               value={formData.name}
               onChange={handleChange}
+              placeholder="Name"
             />
 
             <input
-              type="number"
               name="amount"
-              placeholder="Donation Amount"
               value={formData.amount}
               onChange={handleChange}
+              placeholder="Amount"
             />
 
             <select
@@ -377,195 +361,102 @@ const Donations = () => {
               value={formData.status}
               onChange={handleChange}
             >
-
-              <option value="paid">
-                Paid
-              </option>
-
-              <option value="pending">
-                Pending
-              </option>
-
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
             </select>
 
             <button type="submit">
-
-              {editingId
-                ? 'Update Donor'
-                : 'Add Donation'}
-
+              {editingId ? 'Update' : 'Add'}
             </button>
 
-            {editingId && (
-
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={cancelEdit}
-              >
-                Cancel Edit
-              </button>
-
-            )}
-
           </form>
-
         </div>
       )}
 
-      {/* DONOR TABLE */}
+      {/* TABLE */}
       <div className="donor-table-card">
+        <h3>Donor List ({donors.length})</h3>
 
-        <h3>
-          Donor List ({donors.length})
-        </h3>
+        <table className="donor-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Amount</th>
+              <th>Status</th>
+              {isAdmin && <th>Actions</th>}
+              <th>Receipt</th>
+            </tr>
+          </thead>
 
-        {donors.length === 0 ? (
+          <tbody>
+            {donors.map(d => (
+              <tr key={d.id}>
 
-          <p className="empty-text">
-            No donations added yet.
-          </p>
+                <td>{d.name}</td>
 
-        ) : (
+                <td>₹ {Number(d.amount).toLocaleString()}</td>
 
-          <div className="table-wrapper">
+                <td>
+                  <span className={`status-badge ${d.status}`}>
+                    {d.status}
+                  </span>
+                </td>
 
-            <table className="donor-table">
+                {isAdmin && (
+                  <td className="action-buttons">
 
-              <thead>
+                    <button onClick={() => handleEdit(d)}>
+                      <FaEdit />
+                    </button>
 
-                <tr>
+                    <button onClick={() => handleDelete(d.id)}>
+                      <FaTrash />
+                    </button>
 
-                  <th>Name</th>
+                  </td>
+                )}
 
-                  <th>Amount</th>
+                {/* RECEIPT COLUMN */}
+                <td>
+                  <button
+                    className="edit-btn"
+                    onClick={() => generateReceipt(d)}
+                    title="Download Receipt"
+                  >
+                    <FaFilePdf />
+                  </button>
+                </td>
 
-                  <th>Status</th>
+              </tr>
+            ))}
+          </tbody>
 
-                  {isAdmin && (
-                    <th>Actions</th>
-                  )}
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {donors.map((donor) => (
-
-                  <tr key={donor.id}>
-
-                    <td>{donor.name}</td>
-
-                    <td>
-                      ₹ {Number(
-                        donor.amount
-                      ).toLocaleString()}
-                    </td>
-
-                    <td>
-
-                      <span
-                        className={`status-badge ${donor.status}`}
-                      >
-                        {donor.status}
-                      </span>
-
-                    </td>
-
-                    {isAdmin && (
-
-                      <td className="action-buttons">
-
-                        <button
-                          type="button"
-                          className="edit-btn"
-                          onClick={() =>
-                            handleEdit(donor)
-                          }
-                        >
-
-                          <FaEdit />
-
-                        </button>
-
-                        <button
-                          type="button"
-                          className="delete-btn"
-                          onClick={() =>
-                            handleDelete(donor.id)
-                          }
-                        >
-
-                          <FaTrash />
-
-                        </button>
-
-                      </td>
-                    )}
-
-                  </tr>
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-        )}
-
+        </table>
       </div>
 
-      {/* ADMIN MODAL */}
+      {/* MODAL */}
       {showAdminModal && (
-
         <div className="modal-overlay">
-
           <div className="modal-content">
 
-            <button
-              className="close-modal"
-              onClick={() =>
-                setShowAdminModal(false)
-              }
-            >
-
+            <button onClick={() => setShowAdminModal(false)}>
               <FaTimes />
-
             </button>
 
             <h3>Admin Access</h3>
 
-            <form
-              onSubmit={handleAdminLogin}
-            >
-
+            <form onSubmit={handleAdminLogin}>
               <input
                 type="password"
-                className="input-field"
-                placeholder="Enter Passcode"
                 value={passcode}
-                onChange={(e) =>
-                  setPasscode(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setPasscode(e.target.value)}
+                placeholder="Enter Passcode"
               />
 
-              <button
-                type="submit"
-                className="btn"
-              >
-
-                Login
-
-              </button>
-
+              <button type="submit">Login</button>
             </form>
 
           </div>
-
         </div>
       )}
 
