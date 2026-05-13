@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 import Navbar from './components/Navbar';
@@ -13,54 +13,46 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
 
+  const audioRef = useRef(null);
+  const hasPlayedRef = useRef(false);
+
   useEffect(() => {
+    audioRef.current = new Audio(templeBell);
+    audioRef.current.volume = 0.5;
+
     const playBell = () => {
-      const audio = new Audio(templeBell);
+      if (hasPlayedRef.current) return;
 
-      audio.volume = 0.5;
+      hasPlayedRef.current = true;
 
-      audio.play().catch((err) => {
-        console.log(err);
+      audioRef.current.play().catch((err) => {
+        console.log("Audio blocked:", err);
       });
 
-      // Optional vibration for mobile
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
-
-      // Remove listeners after first interaction
-      document.removeEventListener('click', playBell);
-      document.removeEventListener('touchstart', playBell);
     };
 
-    // Play on first interaction anywhere
-    document.addEventListener('click', playBell);
-    document.addEventListener('touchstart', playBell);
+    // Attach ONLY once on document body capture phase
+    document.body.addEventListener('pointerdown', playBell, { once: true });
 
-    // Splash screen timer
     const timer = setTimeout(() => {
       setLoading(false);
     }, 3000);
 
     return () => {
       clearTimeout(timer);
-
-      document.removeEventListener('click', playBell);
-      document.removeEventListener('touchstart', playBell);
+      document.body.removeEventListener('pointerdown', playBell);
     };
   }, []);
 
-  // Splash Screen
   if (loading) {
     return (
       <div className="splash-screen">
         <div className="overlay"></div>
 
-        <img
-          src={loaderImage}
-          alt="Temple"
-          className="splash-image"
-        />
+        <img src={loaderImage} alt="Temple" className="splash-image" />
 
         <h1 className="telugu-title">
           🙏 శ్రీ కుంటి గంగమ్మ జాతర 🙏
@@ -82,34 +74,20 @@ function App() {
   return (
     <div className="app-container">
 
-      {/* Navbar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
 
-      {/* Main Content */}
       <main className="main-content">
-
         {activeTab === 'home' && <Home />}
-
         {activeTab === 'gallery' && <Gallery />}
-
         {activeTab === 'donations' && <Donations />}
-
       </main>
 
-      {/* Global Footer Watermark */}
       <footer className="global-footer">
-
-        <p>
-          © 2026 Sri Kunti Gangamma Temple Committee, Nallamgadu
-        </p>
-
-        <span>
-          Designed & Developed by Ravi Thalla
-        </span>
-
+        <p>© 2026 Sri Kunti Gangamma Temple Committee, Nallamgadu</p>
+        <span>Designed & Developed by Ravi Thalla</span>
       </footer>
 
     </div>
