@@ -106,7 +106,7 @@ const Donations = () => {
   const handleAdminLogin = (e) => {
     e.preventDefault();
 
-    if (passcode === '1234') {
+    if (passcode === '7082') {
       setIsAdmin(true);
       setShowAdminModal(false);
       setPasscode('');

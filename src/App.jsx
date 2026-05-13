@@ -81,20 +81,37 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Navbar / Tabs */}
+
+      {/* Navbar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
 
-      {/* Page Content */}
+      {/* Main Content */}
       <main className="main-content">
+
         {activeTab === 'home' && <Home />}
 
         {activeTab === 'gallery' && <Gallery />}
 
         {activeTab === 'donations' && <Donations />}
+
       </main>
+
+      {/* Global Footer Watermark */}
+      <footer className="global-footer">
+
+        <p>
+          © 2026 Sri Kunti Gangamma Temple Committee, Nallamgadu
+        </p>
+
+        <span>
+          Designed & Developed by Ravi Thalla
+        </span>
+
+      </footer>
+
     </div>
   );
 }

@@ -1,5 +1,6 @@
 :root {
-  --primary-color: #f97316; /* Saffron orange */
+  --primary-color: #f97316;
+  /* Saffron orange */
   --primary-dark: #ea580c;
   --bg-color: #fcfcfc;
   --text-color: #1f2937;
@@ -28,24 +29,23 @@
 
 body {
   font-family: var(--font-family);
-  background-color: #111; /* Dark background outside the app container */
+  background-color: #111;
   color: var(--text-color);
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Mobile-first App Container */
+/* App Root */
 #root {
   width: 100%;
-  max-width: 480px; /* Constrain on desktop */
-  background-color: var(--bg-color);
   min-height: 100vh;
-  position: relative;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+
+  background-color: var(--bg-color);
+
   display: flex;
   flex-direction: column;
 }
@@ -53,12 +53,15 @@ body {
 .main-content {
   flex: 1;
   padding: 20px;
-  padding-bottom: 100px; /* Space for nav and watermark */
+  padding-bottom: 100px;
+  /* Space for nav and watermark */
   overflow-y: auto;
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   margin-bottom: 0.5em;
   font-weight: 700;
 }
@@ -69,8 +72,13 @@ p {
 }
 
 /* Utilities */
-.text-primary { color: var(--primary-color); }
-.text-center { text-align: center; }
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-center {
+  text-align: center;
+}
 
 /* Buttons */
 .btn {

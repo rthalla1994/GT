@@ -47,7 +47,7 @@ const Gallery = () => {
   const handleAdminLogin = (e) => {
     e.preventDefault();
 
-    if (passcode === '1234') {
+    if (passcode === '7082') {
       setIsAdmin(true);
       setShowAdminModal(false);
       setPasscode('');
@@ -78,6 +78,7 @@ const Gallery = () => {
       );
 
       const data = await response.json();
+      console.log(data);
 
       const newImage = {
         id: Date.now(),
@@ -92,7 +93,7 @@ const Gallery = () => {
       alert('Image uploaded successfully');
     } catch (error) {
       console.error(error);
-      alert('Upload failed');
+      alert(data.error?.message || 'Upload failed');
     } finally {
       setLoading(false);
     }

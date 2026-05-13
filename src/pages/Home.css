@@ -3,8 +3,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .home-container {
@@ -27,7 +34,7 @@
   background: var(--card-bg);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border-color);
 }
 
@@ -84,7 +91,7 @@
   padding: 16px;
   border-radius: 12px;
   border-left: 4px solid var(--primary-color);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .notification-icon {
@@ -101,4 +108,56 @@
 .notification-date {
   font-size: 0.75rem;
   opacity: 0.6;
+}
+
+.visitor-card {
+  background: white;
+  padding: 20px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 20px;
+}
+
+.visitor-card h3 {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.visitor-card h1 {
+  font-size: 2.2rem;
+  color: #c62828;
+}
+
+.visitor-card {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.visit-box {
+  flex: 1;
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.visit-box h3 {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.visit-box h1 {
+  font-size: 2rem;
+  color: #d97706;
+}
+
+@media (max-width: 768px) {
+
+  .visitor-card {
+    flex-direction: column;
+  }
 }
