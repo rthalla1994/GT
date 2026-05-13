@@ -45,18 +45,10 @@ const Donations = () => {
   // FIRESTORE REALTIME
   // =========================
   useEffect(() => {
-    const q = query(
-      collection(db, "donors"),
-      orderBy("createdAt", "desc")
-    );
+    const q = query(collection(db, "donors"), orderBy("createdAt", "desc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      setDonors(data);
+      setDonors(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
     return () => unsubscribe();
@@ -78,7 +70,7 @@ const Donations = () => {
   };
 
   // =========================
-  // INPUT
+  // FORM CHANGE
   // =========================
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,7 +78,7 @@ const Donations = () => {
   };
 
   // =========================
-  // ADD / UPDATE FIRESTORE
+  // ADD / UPDATE
   // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,16 +86,12 @@ const Donations = () => {
     if (!formData.name || !formData.amount) return;
 
     if (editingId) {
-      const ref = doc(db, "donors", editingId);
-
-      await updateDoc(ref, {
+      await updateDoc(doc(db, "donors", editingId), {
         name: formData.name,
         amount: Number(formData.amount),
         status: formData.status
       });
-
       setEditingId(null);
-
     } else {
       await addDoc(collection(db, "donors"), {
         name: formData.name,
@@ -121,13 +109,11 @@ const Donations = () => {
   // =========================
   const handleEdit = (donor) => {
     setEditingId(donor.id);
-
     setFormData({
       name: donor.name,
       amount: donor.amount,
-      status: donor.status,
+      status: donor.status
     });
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -142,10 +128,7 @@ const Donations = () => {
   // =========================
   // TOTAL
   // =========================
-  const totalAmount = donors.reduce(
-    (sum, d) => sum + Number(d.amount),
-    0
-  );
+  const totalAmount = donors.reduce((sum, d) => sum + Number(d.amount), 0);
 
   // =========================
   // EXCEL EXPORT
@@ -159,13 +142,9 @@ const Donations = () => {
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-
     XLSX.utils.book_append_sheet(wb, ws, "Donors");
 
-    const buffer = XLSX.write(wb, {
-      bookType: "xlsx",
-      type: "array"
-    });
+    const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
 
     const blob = new Blob([buffer], {
       type: "application/octet-stream"
@@ -175,48 +154,30 @@ const Donations = () => {
   };
 
   // =========================
-  // PDF RECEIPT (NEW)
+  // PDF RECEIPT (WITH SIGNATURE)
   // =========================
   const generateReceipt = async (donor) => {
     const pdf = new jsPDF("p", "mm", "a4");
 
-    pdf.setFont("helvetica", "normal");
-
-    // HARD RESET AREA (prevents ghost text overlap issues)
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(0, 0, 210, 297, "F");
-
-    const logoUrl = "/temple-logo.png";
-    const receiptNo = `RCPT-${Date.now()}`;
-
     const loadImage = (src) =>
-      new Promise((resolve) => {
+      new Promise(resolve => {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = src;
         img.onload = () => resolve(img);
       });
 
-    const logo = await loadImage(logoUrl);
+    const logo = await loadImage("/temple-logo.png");
+    const signature = await loadImage("/signature.jpg");
 
-    // =========================
-    // MUTTON RULE LOGIC
-    // =========================
     const amount = Number(donor.amount);
+    const receiptNo = `RCPT-${Date.now()}`;
 
     let muttonMessage = "No mutton benefit";
+    if (amount > 3000) muttonMessage = "Eligible for 1 KG Mutton";
+    else if (amount >= 1116) muttonMessage = "Eligible for 1/2 KG Mutton";
 
-    if (amount > 3000) {
-      muttonMessage = "Eligible for 1 KG Mutton";
-    } else if (amount > 1116 && amount <= 3000) {
-      muttonMessage = "Eligible for 1/2 KG Mutton";
-    }
-    pdf.setLineHeightFactor(1.2);
-    pdf.setCharSpace(0);
-
-    // =========================
     // HEADER
-    // =========================
     pdf.setFillColor(255, 245, 235);
     pdf.rect(0, 0, 210, 40, "F");
 
@@ -226,92 +187,48 @@ const Donations = () => {
     pdf.setFontSize(16);
     pdf.text("Sri Kunti Gangamma Temple Committee", 105, 18, { align: "center" });
 
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
     pdf.text("Donation Receipt", 105, 26, { align: "center" });
 
     pdf.setFontSize(9);
     pdf.text(`Receipt No: ${receiptNo}`, 190, 10, { align: "right" });
 
-    // =========================
-    // DETAILS BOX
-    // =========================
-    pdf.setDrawColor(200);
+    // DETAILS
     pdf.roundedRect(15, 50, 180, 110, 3, 3);
 
     pdf.setFontSize(11);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Donor Details", 20, 62);
+    pdf.text(`Name: ${donor.name}`, 20, 75);
+    pdf.text(`Amount: ₹ ${amount.toLocaleString()}`, 20, 85);
+    pdf.text(`Status: ${donor.status}`, 20, 95);
+    pdf.text(`Date: ${new Date().toLocaleString()}`, 20, 105);
 
-    pdf.setFont("helvetica", "normal");
+    pdf.text(`Mutton Benefit: ${muttonMessage}`, 20, 120);
 
-    pdf.text("Name:", 20, 75);
-    pdf.text(`${donor.name}`, 70, 75);
-
-    pdf.text("Amount:", 20, 85);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(`₹ ${String(amount.toLocaleString())}`, 70, 85);
-
-    pdf.text("Status:", 20, 95);
-    pdf.text(`${donor.status.toUpperCase()}`, 70, 95);
-
-    pdf.text("Date:", 20, 105);
-    pdf.text(`${new Date().toLocaleString()}`, 70, 105);
-
-    // =========================
-    // MUTTON SECTION (NEW)
-    // =========================
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Mutton Benefit:", 20, 120);
-
-    pdf.setFont("helvetica", "normal");
-    pdf.text(muttonMessage, 70, 120);
-
-    // =========================
-    // THANK YOU BOX
-    // =========================
+    // THANK YOU
     pdf.setFillColor(255, 250, 240);
     pdf.roundedRect(15, 165, 180, 25, 3, 3, "F");
 
-    pdf.setFont("helvetica", "bold");
-    pdf.text(
-      "Thank you for your generous contribution to the temple.",
-      105,
-      180,
-      { align: "center" }
-    );
+    pdf.text("Thank you for your contribution", 105, 180, { align: "center" });
 
-    // =========================
     // SIGNATURE
-    // =========================
-    pdf.setFont("normal");
-    pdf.text("Authorized Signature", 155, 230);
-    pdf.line(140, 225, 190, 225);
-
-    // =========================
-    // FOOTER
-    // =========================
-    pdf.setFontSize(9);
-    pdf.text(
-      "This is a computer generated receipt.",
-      105,
-      280,
-      { align: "center" }
-    );
+    pdf.text("Authorized Signature", 150, 225);
+    pdf.line(140, 228, 190, 228);
+    pdf.addImage(signature, "PNG", 145, 232, 40, 18);
 
     pdf.save(`receipt_${donor.name}.pdf`);
   };
 
+  // =========================
+  // UI (FULL RESTORED)
+  // =========================
   return (
     <div className="donations-container fade-in">
 
-      {/* HEADER */}
       <div className="donations-header">
         <h2>Temple Donations</h2>
         <p>Sri Kunti Gangamma Jathara Contributions</p>
       </div>
 
-      {/* TOTAL */}
       <div className="total-card">
         <FaHandHoldingHeart className="total-icon" />
         <div>
@@ -320,7 +237,6 @@ const Donations = () => {
         </div>
       </div>
 
-      {/* ADMIN */}
       <div style={{ display: "flex", gap: 10 }}>
         {!isAdmin && (
           <button className="admin-btn" onClick={() => setShowAdminModal(true)}>
@@ -329,51 +245,32 @@ const Donations = () => {
         )}
 
         {isAdmin && (
-          <button className="admin-btn" onClick={exportToExcel}>
-            Export Excel
-          </button>
+          <>
+            <button className="admin-btn" onClick={exportToExcel}>
+              Export Excel
+            </button>
+          </>
         )}
       </div>
 
-      {/* FORM */}
       {isAdmin && (
         <div className="donor-form-card">
-          <h3>{editingId ? 'Edit Donor' : 'Add Donor'}</h3>
+          <h3>{editingId ? "Edit Donor" : "Add Donor"}</h3>
 
           <form onSubmit={handleSubmit} className="donor-form">
+            <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" />
+            <input name="amount" value={formData.amount} onChange={handleChange} placeholder="Amount" />
 
-            <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Name"
-            />
-
-            <input
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              placeholder="Amount"
-            />
-
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-            >
+            <select name="status" value={formData.status} onChange={handleChange}>
               <option value="paid">Paid</option>
               <option value="pending">Pending</option>
             </select>
 
-            <button type="submit">
-              {editingId ? 'Update' : 'Add'}
-            </button>
-
+            <button type="submit">{editingId ? "Update" : "Add"}</button>
           </form>
         </div>
       )}
 
-      {/* TABLE */}
       <div className="donor-table-card">
         <h3>Donor List ({donors.length})</h3>
 
@@ -391,42 +288,22 @@ const Donations = () => {
           <tbody>
             {donors.map(d => (
               <tr key={d.id}>
-
                 <td>{d.name}</td>
-
                 <td>₹ {Number(d.amount).toLocaleString()}</td>
-
-                <td>
-                  <span className={`status-badge ${d.status}`}>
-                    {d.status}
-                  </span>
-                </td>
+                <td>{d.status}</td>
 
                 {isAdmin && (
-                  <td className="action-buttons">
-
-                    <button onClick={() => handleEdit(d)}>
-                      <FaEdit />
-                    </button>
-
-                    <button onClick={() => handleDelete(d.id)}>
-                      <FaTrash />
-                    </button>
-
+                  <td>
+                    <button onClick={() => handleEdit(d)}><FaEdit /></button>
+                    <button onClick={() => handleDelete(d.id)}><FaTrash /></button>
                   </td>
                 )}
 
-                {/* RECEIPT COLUMN */}
                 <td>
-                  <button
-                    className="edit-btn"
-                    onClick={() => generateReceipt(d)}
-                    title="Download Receipt"
-                  >
+                  <button onClick={() => generateReceipt(d)}>
                     <FaFilePdf />
                   </button>
                 </td>
-
               </tr>
             ))}
           </tbody>
@@ -434,7 +311,6 @@ const Donations = () => {
         </table>
       </div>
 
-      {/* MODAL */}
       {showAdminModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -452,7 +328,6 @@ const Donations = () => {
                 onChange={(e) => setPasscode(e.target.value)}
                 placeholder="Enter Passcode"
               />
-
               <button type="submit">Login</button>
             </form>
 
