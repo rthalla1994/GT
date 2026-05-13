@@ -61,13 +61,9 @@ const Donations = () => {
   ];
 
   const [donors, setDonors] = useState([]);
-
   const [isAdmin, setIsAdmin] = useState(false);
-
   const [showAdminModal, setShowAdminModal] = useState(false);
-
   const [passcode, setPasscode] = useState('');
-
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -76,47 +72,75 @@ const Donations = () => {
     status: 'paid',
   });
 
-  // Load donors
+  // LOAD DONORS
   useEffect(() => {
 
-    const savedDonors =
-      localStorage.getItem('templeDonors');
+    try {
 
-    if (
-      savedDonors &&
-      JSON.parse(savedDonors).length > 0
-    ) {
+      const savedDonors =
+        localStorage.getItem('templeDonors');
 
-      setDonors(JSON.parse(savedDonors));
+      if (savedDonors) {
 
-    } else {
+        const parsed =
+          JSON.parse(savedDonors);
+
+        setDonors(parsed);
+
+      } else {
+
+        localStorage.setItem(
+          'templeDonors',
+          JSON.stringify(initialDonors)
+        );
+
+        setDonors(initialDonors);
+      }
+
+    } catch (error) {
+
+      console.log(error);
 
       setDonors(initialDonors);
-
-      localStorage.setItem(
-        'templeDonors',
-        JSON.stringify(initialDonors)
-      );
     }
 
   }, []);
 
+  // SAVE DONORS
+  useEffect(() => {
 
-  // Admin Login
+    if (donors.length > 0) {
+
+      localStorage.setItem(
+        'templeDonors',
+        JSON.stringify(donors)
+      );
+    }
+
+  }, [donors]);
+
+  // ADMIN LOGIN
   const handleAdminLogin = (e) => {
+
     e.preventDefault();
 
     if (passcode === '7082') {
+
       setIsAdmin(true);
+
       setShowAdminModal(false);
+
       setPasscode('');
+
     } else {
+
       alert('Incorrect passcode');
     }
   };
 
-  // Input Change
+  // INPUT CHANGE
   const handleChange = (e) => {
+
     const { name, value } = e.target;
 
     setFormData({
@@ -125,20 +149,19 @@ const Donations = () => {
     });
   };
 
-  // Add / Update Donor
+  // ADD / UPDATE
   const handleSubmit = (e) => {
+
     e.preventDefault();
 
     if (!formData.name || !formData.amount) {
       return;
     }
 
-    let updatedDonors = [];
-
     // UPDATE
-    if (editingId !== null) {
+    if (editingId) {
 
-      updatedDonors = donors.map((donor) =>
+      const updatedDonors = donors.map((donor) =>
         donor.id === editingId
           ? {
             ...donor,
@@ -151,12 +174,9 @@ const Donations = () => {
 
       setDonors(updatedDonors);
 
-      localStorage.setItem(
-        'templeDonors',
-        JSON.stringify(updatedDonors)
-      );
-
       setEditingId(null);
+
+      alert('Donor updated successfully');
 
     } else {
 
@@ -168,14 +188,9 @@ const Donations = () => {
         status: formData.status,
       };
 
-      updatedDonors = [newDonor, ...donors];
+      setDonors([newDonor, ...donors]);
 
-      setDonors(updatedDonors);
-
-      localStorage.setItem(
-        'templeDonors',
-        JSON.stringify(updatedDonors)
-      );
+      alert('Donor added successfully');
     }
 
     setFormData({
@@ -185,83 +200,104 @@ const Donations = () => {
     });
   };
 
-  // Edit Donor
+  // EDIT
   const handleEdit = (donor) => {
 
     setEditingId(donor.id);
 
     setFormData({
-      name: donor.name || '',
-      amount: donor.amount || '',
-      status: donor.status || 'pending',
+      name: donor.name,
+      amount: donor.amount,
+      status: donor.status,
     });
 
-    // Scroll to top form
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
   };
 
-  // Delete Donor
+  // DELETE
   const handleDelete = (id) => {
 
-    const confirmDelete = window.confirm(
-      'Delete this donor?'
-    );
+    const confirmDelete =
+      window.confirm(
+        'Are you sure you want to delete this donor?'
+      );
 
-    if (confirmDelete) {
+    if (!confirmDelete) return;
 
-      const updatedDonors = donors.filter(
+    const updatedDonors =
+      donors.filter(
         (donor) => donor.id !== id
       );
 
-      setDonors(updatedDonors);
+    setDonors(updatedDonors);
 
-      localStorage.setItem(
-        'templeDonors',
-        JSON.stringify(updatedDonors)
-      );
-    }
+    alert('Donor deleted successfully');
   };
 
-  // Total
+  // CANCEL EDIT
+  const cancelEdit = () => {
+
+    setEditingId(null);
+
+    setFormData({
+      name: '',
+      amount: '',
+      status: 'paid',
+    });
+  };
+
+  // TOTAL
   const totalAmount = donors.reduce(
-    (sum, donor) => sum + donor.amount,
+    (sum, donor) =>
+      sum + Number(donor.amount),
     0
   );
 
   return (
+
     <div className="donations-container fade-in">
 
-      {/* Header */}
+      {/* HEADER */}
       <div className="donations-header">
+
         <h2>Temple Donations</h2>
 
         <p>
           Your generous support helps us organize
           Sri Kunti Gangamma Jathara celebrations.
         </p>
+
       </div>
 
-      {/* Total Card */}
+      {/* TOTAL */}
       <div className="total-card">
+
         <FaHandHoldingHeart className="total-icon" />
 
         <div>
+
           <p>Total Donations</p>
 
-          <h1>₹ {totalAmount.toLocaleString()}</h1>
+          <h1>
+            ₹ {totalAmount.toLocaleString()}
+          </h1>
+
         </div>
+
       </div>
 
-      {/* Wallet Details */}
+      {/* WALLET */}
       <div className="wallet-card">
 
         <div className="wallet-header">
+
           <FaMobileAlt className="wallet-icon" />
 
           <h3>Mobile Wallet / UPI</h3>
+
         </div>
 
         <div className="wallet-details">
@@ -279,26 +315,34 @@ const Donations = () => {
           </p>
 
           <p className="wallet-note">
-            Use Google Pay, PhonePe, Paytm
-            or any UPI app to contribute.
+            Use Google Pay, PhonePe,
+            Paytm or any UPI app.
           </p>
 
         </div>
+
       </div>
 
-      {/* Admin Login */}
+      {/* ADMIN LOGIN */}
       {!isAdmin && (
+
         <button
           className="admin-btn"
-          onClick={() => setShowAdminModal(true)}
+          onClick={() =>
+            setShowAdminModal(true)
+          }
         >
+
           <FaLock />
+
           Admin Login
+
         </button>
       )}
 
-      {/* Admin Form */}
+      {/* ADMIN FORM */}
       {isAdmin && (
+
         <div className="donor-form-card">
 
           <h3>
@@ -333,6 +377,7 @@ const Donations = () => {
               value={formData.status}
               onChange={handleChange}
             >
+
               <option value="paid">
                 Paid
               </option>
@@ -340,22 +385,40 @@ const Donations = () => {
               <option value="pending">
                 Pending
               </option>
+
             </select>
 
             <button type="submit">
+
               {editingId
                 ? 'Update Donor'
                 : 'Add Donation'}
+
             </button>
 
+            {editingId && (
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={cancelEdit}
+              >
+                Cancel Edit
+              </button>
+
+            )}
+
           </form>
+
         </div>
       )}
 
-      {/* Donor Table */}
+      {/* DONOR TABLE */}
       <div className="donor-table-card">
 
-        <h3>Donor List</h3>
+        <h3>
+          Donor List ({donors.length})
+        </h3>
 
         {donors.length === 0 ? (
 
@@ -370,15 +433,21 @@ const Donations = () => {
             <table className="donor-table">
 
               <thead>
+
                 <tr>
+
                   <th>Name</th>
+
                   <th>Amount</th>
+
                   <th>Status</th>
 
                   {isAdmin && (
                     <th>Actions</th>
                   )}
+
                 </tr>
+
               </thead>
 
               <tbody>
@@ -390,15 +459,19 @@ const Donations = () => {
                     <td>{donor.name}</td>
 
                     <td>
-                      ₹ {donor.amount.toLocaleString()}
+                      ₹ {Number(
+                        donor.amount
+                      ).toLocaleString()}
                     </td>
 
                     <td>
+
                       <span
                         className={`status-badge ${donor.status}`}
                       >
                         {donor.status}
                       </span>
+
                     </td>
 
                     {isAdmin && (
@@ -408,17 +481,25 @@ const Donations = () => {
                         <button
                           type="button"
                           className="edit-btn"
-                          onClick={() => handleEdit(donor)}
+                          onClick={() =>
+                            handleEdit(donor)
+                          }
                         >
+
                           <FaEdit />
+
                         </button>
 
                         <button
                           type="button"
                           className="delete-btn"
-                          onClick={() => handleDelete(donor.id)}
+                          onClick={() =>
+                            handleDelete(donor.id)
+                          }
                         >
+
                           <FaTrash />
+
                         </button>
 
                       </td>
@@ -433,9 +514,10 @@ const Donations = () => {
 
           </div>
         )}
+
       </div>
 
-      {/* Admin Modal */}
+      {/* ADMIN MODAL */}
       {showAdminModal && (
 
         <div className="modal-overlay">
@@ -448,12 +530,16 @@ const Donations = () => {
                 setShowAdminModal(false)
               }
             >
+
               <FaTimes />
+
             </button>
 
             <h3>Admin Access</h3>
 
-            <form onSubmit={handleAdminLogin}>
+            <form
+              onSubmit={handleAdminLogin}
+            >
 
               <input
                 type="password"
@@ -461,7 +547,9 @@ const Donations = () => {
                 placeholder="Enter Passcode"
                 value={passcode}
                 onChange={(e) =>
-                  setPasscode(e.target.value)
+                  setPasscode(
+                    e.target.value
+                  )
                 }
               />
 
@@ -469,7 +557,9 @@ const Donations = () => {
                 type="submit"
                 className="btn"
               >
+
                 Login
+
               </button>
 
             </form>
