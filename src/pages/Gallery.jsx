@@ -3,8 +3,6 @@ import {
   FaUpload,
   FaLock,
   FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
   FaDownload,
   FaHeart,
   FaCheckSquare,
@@ -28,7 +26,6 @@ import './Gallery.css';
 
 const CLOUD_NAME = 'dkc7lk6qs';
 const UPLOAD_PRESET = 'temple_gallery';
-
 const ADMIN_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE || '7082';
 
 const Gallery = () => {
@@ -47,23 +44,15 @@ const Gallery = () => {
   }, []);
 
   const fetchImages = async () => {
-    try {
-      const q = query(
-        collection(db, 'gallery'),
-        orderBy('createdAt', 'desc')
-      );
+    const q = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
 
-      const snapshot = await getDocs(q);
+    const imgs = snapshot.docs.map((d) => ({
+      firestoreId: d.id,
+      ...d.data()
+    }));
 
-      const imgs = snapshot.docs.map((d) => ({
-        firestoreId: d.id,
-        ...d.data()
-      }));
-
-      setImages(imgs);
-    } catch (err) {
-      console.error(err);
-    }
+    setImages(imgs);
   };
 
   const handleAdminLogin = (e) => {
@@ -78,6 +67,9 @@ const Gallery = () => {
     }
   };
 
+  // =========================
+  // UPLOAD IMAGE + VIDEO
+  // =========================
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -90,33 +82,40 @@ const Gallery = () => {
         formData.append('file', file);
         formData.append('upload_preset', UPLOAD_PRESET);
 
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          { method: 'POST', body: formData }
-        );
+        const isVideo = file.type.startsWith("video/");
+
+        const uploadUrl = isVideo
+          ? `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`
+          : `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          body: formData
+        });
 
         const data = await res.json();
+
         if (!data.secure_url) return null;
 
         return {
           url: data.secure_url,
+          type: isVideo ? "video" : "image",
           likes: 0,
           createdAt: new Date().toISOString()
         };
       });
 
       const results = await Promise.all(uploadPromises);
-
-      const validImages = results.filter(Boolean);
+      const validMedia = results.filter(Boolean);
 
       await Promise.all(
-        validImages.map((img) =>
-          addDoc(collection(db, 'gallery'), img)
+        validMedia.map((item) =>
+          addDoc(collection(db, 'gallery'), item)
         )
       );
 
       await fetchImages();
-      alert('Images uploaded successfully');
+      alert('Media uploaded successfully');
     } catch (err) {
       console.error(err);
       alert('Upload failed');
@@ -127,94 +126,46 @@ const Gallery = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this image?')) return;
+    if (!window.confirm('Delete this item?')) return;
 
     await deleteDoc(doc(db, 'gallery', id));
     setImages((prev) => prev.filter((i) => i.firestoreId !== id));
   };
 
   const handleLike = async (id) => {
-    try {
-      await updateDoc(doc(db, 'gallery', id), {
-        likes: increment(1)
-      });
+    await updateDoc(doc(db, 'gallery', id), {
+      likes: increment(1)
+    });
 
-      setImages((prev) =>
-        prev.map((img) =>
-          img.firestoreId === id
-            ? { ...img, likes: (img.likes || 0) + 1 }
-            : img
-        )
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const nextImage = () => {
-    setSelectedIndex((prev) =>
-      prev === null || prev >= images.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const prevImage = () => {
-    setSelectedIndex((prev) =>
-      prev === null || prev <= 0 ? images.length - 1 : prev - 1
-    );
-  };
-
-  const toggleSelectImage = (id) => {
-    setSelectedImages((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = () => {
-    setSelectedImages((prev) =>
-      prev.length === images.length
-        ? []
-        : images.map((i) => i.firestoreId)
+    setImages((prev) =>
+      prev.map((img) =>
+        img.firestoreId === id
+          ? { ...img, likes: (img.likes || 0) + 1 }
+          : img
+      )
     );
   };
 
   const handleDownload = async (url) => {
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
+    const res = await fetch(url);
+    const blob = await res.blob();
 
-      const blobUrl = window.URL.createObjectURL(blob);
+    const blobUrl = window.URL.createObjectURL(blob);
 
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `temple-${Date.now()}.jpg`;
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `temple-${Date.now()}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDownloadAll = async () => {
-    const files = images.filter((img) =>
-      selectedImages.includes(img.firestoreId)
-    );
-
-    if (!files.length) return alert('Select images first');
-
-    for (const img of files) {
-      await handleDownload(img.url);
-    }
+    window.URL.revokeObjectURL(blobUrl);
   };
 
   return (
     <div className="gallery-container fade-in">
 
+      {/* HEADER */}
       <div className="gallery-header">
         <h2>Temple Gallery</h2>
 
@@ -228,6 +179,7 @@ const Gallery = () => {
         )}
       </div>
 
+      {/* ADMIN UPLOAD */}
       {isAdmin && (
         <div className="admin-controls">
           <p className="admin-badge">Admin Mode Active</p>
@@ -235,7 +187,7 @@ const Gallery = () => {
           <input
             type="file"
             multiple
-            accept="image/*"
+            accept="image/*,video/*"
             ref={fileInputRef}
             hidden
             onChange={handleFileUpload}
@@ -247,47 +199,30 @@ const Gallery = () => {
             disabled={loading}
           >
             <FaUpload style={{ marginRight: 8 }} />
-            {loading ? 'Uploading...' : 'Upload Images'}
+            {loading ? 'Uploading...' : 'Upload Media'}
           </button>
         </div>
       )}
 
-      {images.length > 0 && (
-        <div className="gallery-top-actions">
-          <button onClick={handleSelectAll}>
-            {selectedImages.length === images.length ? (
-              <FaCheckSquare />
-            ) : (
-              <FaRegSquare />
-            )}
-            Select All
-          </button>
-
-          <button onClick={handleDownloadAll}>
-            <FaDownload /> Download Selected
-          </button>
-        </div>
-      )}
-
+      {/* GRID */}
       <div className="image-grid">
         {images.map((img, index) => (
           <div key={img.firestoreId} className="image-card">
 
-            <button
-              className="select-image-btn"
-              onClick={() => toggleSelectImage(img.firestoreId)}
-            >
-              {selectedImages.includes(img.firestoreId)
-                ? <FaCheckSquare />
-                : <FaRegSquare />}
-            </button>
-
-            <img
-              src={img.url}
-              alt="Temple"
-              loading="lazy"
-              onClick={() => setSelectedIndex(index)}
-            />
+            {img.type === "video" ? (
+              <video
+                src={img.url}
+                controls
+                className="gallery-video"
+              />
+            ) : (
+              <img
+                src={img.url}
+                alt="Temple"
+                loading="lazy"
+                onClick={() => setSelectedIndex(index)}
+              />
+            )}
 
             <div className="image-actions">
               <button onClick={() => handleLike(img.firestoreId)}>
@@ -309,30 +244,54 @@ const Gallery = () => {
         ))}
       </div>
 
+      {/* =========================
+          MODERN SWIPE FULLSCREEN
+      ========================= */}
       {selectedIndex !== null && (
-        <div className="fullscreen-view">
+        <div className="fullscreen-view-modern">
 
-          <button onClick={() => setSelectedIndex(null)}>
+          <button
+            className="close-btn"
+            onClick={() => setSelectedIndex(null)}
+          >
             <FaTimes />
           </button>
 
-          <button onClick={prevImage}>
-            <FaChevronLeft />
-          </button>
+          <div className="swipe-container">
+            <div
+              className="swipe-track"
+              style={{
+                transform: `translateX(-${selectedIndex * 100}%)`
+              }}
+            >
+              {images.map((img) => (
+                <div key={img.firestoreId} className="swipe-item">
 
-          <img
-            src={images[selectedIndex]?.url}
-            alt="preview"
-            className="fullscreen-image"
-          />
+                  {img.type === "video" ? (
+                    <video
+                      src={img.url}
+                      className="swipe-media"
+                      controls
+                      autoPlay
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={img.url}
+                      alt="preview"
+                      className="swipe-media"
+                    />
+                  )}
 
-          <button onClick={nextImage}>
-            <FaChevronRight />
-          </button>
+                </div>
+              ))}
+            </div>
+          </div>
 
         </div>
       )}
 
+      {/* ADMIN LOGIN */}
       {showAdminModal && (
         <div className="modal-overlay">
           <div className="modal-content">
