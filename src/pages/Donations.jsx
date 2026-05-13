@@ -300,9 +300,10 @@ const Donations = () => {
                 )}
 
                 <td>
-                  <button onClick={() => generateReceipt(d)}>
-                    <FaFilePdf />
-                  </button>
+                  {d.status === "paid" ? (
+                    <button onClick={() => generateReceipt(d)}>
+                      <FaFilePdf />
+                    </button>) : (<span className="status-badge pending">Pending</span>)}
                 </td>
               </tr>
             ))}
