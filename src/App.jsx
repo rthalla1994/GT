@@ -22,7 +22,6 @@ function App() {
 
     const playBell = () => {
       if (hasPlayedRef.current) return;
-
       hasPlayedRef.current = true;
 
       audioRef.current.play().catch((err) => {
@@ -32,10 +31,20 @@ function App() {
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
+
+      document.body.removeEventListener('pointerdown', playBell);
     };
 
-    // Attach ONLY once on document body capture phase
-    document.body.addEventListener('pointerdown', playBell, { once: true });
+    // Try autoplay immediately (works if browser allows it)
+    audioRef.current.play()
+      .then(() => {
+        hasPlayedRef.current = true;
+        if (navigator.vibrate) navigator.vibrate(200);
+      })
+      .catch(() => {
+        // Autoplay blocked — wait for first user interaction instead
+        document.body.addEventListener('pointerdown', playBell, { once: true });
+      });
 
     const timer = setTimeout(() => {
       setLoading(false);

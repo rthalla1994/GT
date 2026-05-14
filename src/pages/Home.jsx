@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import {
   FaBell,
   FaCalendarAlt,
-  FaClock
+  FaClock,
+  FaTimes
 } from 'react-icons/fa';
 
 import {
@@ -25,6 +26,102 @@ const Home = () => {
     uniqueVisitors: 0
   });
 
+  const [showFestivalPopup, setShowFestivalPopup] = useState(true);
+
+  // =========================
+  // COUNTDOWN
+  // =========================
+  const calculateTimeLeft = () => {
+
+    const festivalDate =
+      new Date("2026-05-19T00:00:00");
+
+    const difference =
+      festivalDate - new Date();
+
+    if (difference <= 0) {
+
+      return {
+        days: 0,
+        hours: 0,
+        minutes: 0
+      };
+    }
+
+    return {
+      days:
+        Math.floor(
+          difference / (1000 * 60 * 60 * 24)
+        ),
+
+      hours:
+        Math.floor(
+          (difference / (1000 * 60 * 60)) % 24
+        ),
+
+      minutes:
+        Math.floor(
+          (difference / 1000 / 60) % 60
+        )
+    };
+  };
+
+  const [timeLeft, setTimeLeft] =
+    useState(calculateTimeLeft());
+
+  useEffect(() => {
+
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 60000);
+
+    return () => clearInterval(timer);
+
+  }, []);
+
+  // =========================
+  // BELL SOUND
+  // =========================
+  useEffect(() => {
+
+    const playBell = async () => {
+
+      try {
+
+        const alreadyPlayed =
+          sessionStorage.getItem(
+            'temple_bell_played'
+          );
+
+        if (alreadyPlayed) return;
+
+        const audio =
+          new Audio('/temple-bell.mp3');
+
+        audio.volume = 0.7;
+
+        await audio.play();
+
+        sessionStorage.setItem(
+          'temple_bell_played',
+          'true'
+        );
+
+      } catch (err) {
+
+        console.log(
+          'Audio autoplay blocked'
+        );
+      }
+    };
+
+    setTimeout(playBell, 1200);
+
+  }, []);
+
+  // =========================
+  // ANALYTICS
+  // =========================
   useEffect(() => {
 
     const updateAnalytics = async () => {
@@ -45,7 +142,7 @@ const Home = () => {
             'temple_unique_visitor'
           );
 
-        // FIRST TIME DOCUMENT
+        // FIRST TIME
         if (!analyticsSnap.exists()) {
 
           await setDoc(analyticsRef, {
@@ -65,12 +162,12 @@ const Home = () => {
 
         } else {
 
-          // ALWAYS increment total visits
+          // TOTAL VISITS
           await updateDoc(analyticsRef, {
             totalVisits: increment(1)
           });
 
-          // Increment unique visitors only once
+          // UNIQUE VISITOR
           if (!alreadyVisited) {
 
             await updateDoc(analyticsRef, {
@@ -83,7 +180,7 @@ const Home = () => {
             );
           }
 
-          // Fetch updated values
+          // UPDATED DATA
           const updatedSnap =
             await getDoc(analyticsRef);
 
@@ -105,6 +202,9 @@ const Home = () => {
 
   }, []);
 
+  // =========================
+  // NOTIFICATIONS
+  // =========================
   const notifications = [
     {
       id: 1,
@@ -114,7 +214,7 @@ const Home = () => {
     },
     {
       id: 2,
-      text: "Ammavari Abhishekam and Mangala Harathi at 7:30 PM.",
+      text: "Ammavari Abhishekam and Mangala Harathi at 7:30 AM.",
       date: "19th May 2026",
       icon: <FaCalendarAlt />
     },
@@ -138,6 +238,9 @@ const Home = () => {
     }
   ];
 
+  // =========================
+  // TIMINGS
+  // =========================
   const timings = [
     {
       name: "19th May - Temple Ritual",
@@ -167,159 +270,224 @@ const Home = () => {
 
   return (
 
-    <div className="home-container fade-in">
+    <>
 
-      {/* Welcome */}
-      <section className="welcome-section">
-        <div className="temple-logo-wrapper">
-          <img
-            src="/temple-logo.png"
-            alt="Temple Logo"
-            className="temple-logo"
-          />
-        </div>
-        <h2>
-          Welcome Devotees
-        </h2>
+      {/* FESTIVAL POPUP */}
+      {showFestivalPopup && (
 
-        <p>
-          Welcome to Sri Kunti Gangamma
-          Jathara celebrations.
-          Stay updated with festival
-          schedules, rituals, and
-          announcements.
-        </p>
+        <div className="festival-popup-overlay">
 
-      </section>
+          <div className="festival-popup">
 
-      {/* Visitor Count */}
-      <section className="visitor-card">
-
-        <div className="visit-box">
-          <h3>Total Visits</h3>
-
-          <h1>
-            {visitorCount.totalVisits}
-          </h1>
-        </div>
-
-        <div className="visit-box">
-          <h3>Unique Devotees</h3>
-
-          <h1>
-            {visitorCount.uniqueVisitors}
-          </h1>
-        </div>
-
-      </section>
-
-      {/* Timings */}
-      <section className="card timings-card">
-
-        <h3>
-          <FaClock className="icon" />
-          Festival Timings
-        </h3>
-
-        <ul>
-
-          {timings.map((t, index) => (
-
-            <li key={index}>
-
-              <span className="timing-name">
-                {t.name}
-              </span>
-
-              <span className="timing-time">
-                {t.time}
-              </span>
-
-            </li>
-          ))}
-
-        </ul>
-
-      </section>
-
-      {/* Notifications */}
-      <section className="notifications-section">
-
-        <h3>
-          Recent Notifications
-        </h3>
-
-        <div className="notification-list">
-
-          {notifications.map(note => (
-
-            <div
-              key={note.id}
-              className="notification-card"
+            <button
+              className="festival-close-btn"
+              onClick={() => setShowFestivalPopup(false)}
             >
+              <FaTimes />
+            </button>
 
-              <div className="notification-icon">
-                {note.icon}
-              </div>
+            <img
+              src="/festival-banner.png"
+              alt="Festival Banner"
+              className="festival-popup-image"
+            />
 
-              <div className="notification-content">
+          </div>
 
-                <p>
-                  {note.text}
-                </p>
+        </div>
+      )}
 
-                <span className="notification-date">
-                  {note.date}
+      <div className="home-container fade-in">
+
+        {/* WELCOME */}
+        <section className="welcome-section">
+
+          <div className="temple-logo-wrapper">
+
+            <img
+              src="/temple-logo.png"
+              alt="Temple Logo"
+              className="temple-logo"
+            />
+
+          </div>
+
+          <h2>
+            Welcome Devotees
+          </h2>
+
+          <p>
+            Welcome to Sri Kunti Gangamma
+            Jathara celebrations.
+            Stay updated with festival
+            schedules, rituals, and
+            announcements.
+          </p>
+
+        </section>
+
+        {/* COUNTDOWN */}
+        <section className="countdown-card">
+
+          <h3>
+            కుంట్టి గంగమ్మ జాతర ప్రారంభానికి
+          </h3>
+
+          <div className="countdown-grid">
+
+            <div className="countdown-box">
+              <h1>{timeLeft.days}</h1>
+              <p>Days</p>
+            </div>
+
+            <div className="countdown-box">
+              <h1>{timeLeft.hours}</h1>
+              <p>Hours</p>
+            </div>
+
+            <div className="countdown-box">
+              <h1>{timeLeft.minutes}</h1>
+              <p>Minutes</p>
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* VISITOR COUNT */}
+        <section className="visitor-card">
+
+          <div className="visit-box">
+
+            <h3>Total Visits</h3>
+
+            <h1>
+              {visitorCount.totalVisits}
+            </h1>
+
+          </div>
+
+          <div className="visit-box">
+
+            <h3>Unique Devotees</h3>
+
+            <h1>
+              {visitorCount.uniqueVisitors}
+            </h1>
+
+          </div>
+
+        </section>
+
+        {/* TIMINGS */}
+        <section className="card timings-card">
+
+          <h3>
+            <FaClock className="icon" />
+            Festival Timings
+          </h3>
+
+          <ul>
+
+            {timings.map((t, index) => (
+
+              <li key={index}>
+
+                <span className="timing-name">
+                  {t.name}
                 </span>
 
+                <span className="timing-time">
+                  {t.time}
+                </span>
+
+              </li>
+            ))}
+
+          </ul>
+
+        </section>
+
+        {/* NOTIFICATIONS */}
+        <section className="notifications-section">
+
+          <h3>
+            Recent Notifications
+          </h3>
+
+          <div className="notification-list">
+
+            {notifications.map(note => (
+
+              <div
+                key={note.id}
+                className="notification-card"
+              >
+
+                <div className="notification-icon">
+                  {note.icon}
+                </div>
+
+                <div className="notification-content">
+
+                  <p>
+                    {note.text}
+                  </p>
+
+                  <span className="notification-date">
+                    {note.date}
+                  </span>
+
+                </div>
+
               </div>
+            ))}
 
-            </div>
-          ))}
+          </div>
 
-        </div>
+        </section>
 
-      </section>
+        {/* MAP */}
+        <section className="card map-section">
 
-      {/* Google Maps */}
-      <section className="card map-section">
+          <h3>
+            Temple Location
+          </h3>
 
-        <h3>
-          Temple Location
-        </h3>
+          <p className="map-text">
+            Visit Sri Kunti Gangamma Temple
+            during the Jathara celebrations.
+          </p>
 
-        <p className="map-text">
-          Visit Sri Kunti Gangamma Temple
-          during the Jathara celebrations.
-        </p>
+          <div className="map-container">
 
-        <div className="map-container">
+            <iframe
+              title="Temple Location"
+              src="https://www.google.com/maps?q=Sri%20Kunti%20Gangamma%20Temple&output=embed"
+              width="100%"
+              height="250"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
 
-          <iframe
-            title="Temple Location"
-            src="https://www.google.com/maps?q=Sri%20Kunti%20Gangamma%20Temple&output=embed"
-            width="100%"
-            height="250"
-            style={{ border: 0 }}
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
+          </div>
 
-        </div>
+          <a
+            href="https://maps.app.goo.gl/MCUSmmM1zy3Weonu8"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="map-btn"
+          >
+            Open in Google Maps
+          </a>
 
-        <a
-          href="https://maps.app.goo.gl/MCUSmmM1zy3Weonu8"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="map-btn"
-        >
-          Open in Google Maps
-        </a>
+        </section>
 
-      </section>
+      </div>
 
-    </div>
+    </>
   );
 };
 

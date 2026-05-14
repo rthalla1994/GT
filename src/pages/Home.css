@@ -3,6 +3,7 @@
 }
 
 @keyframes fadeIn {
+
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -20,6 +21,10 @@
   gap: 24px;
 }
 
+/* =========================
+   WELCOME
+========================= */
+
 .welcome-section h2 {
   color: var(--primary-color);
   margin-bottom: 8px;
@@ -28,21 +33,89 @@
 .welcome-section p {
   color: var(--text-color);
   opacity: 0.8;
+  line-height: 1.7;
 }
+
+/* =========================
+   CARD
+========================= */
 
 .card {
   background: var(--card-bg);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 18px;
+  padding: 18px;
+
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.06);
+
   border: 1px solid var(--border-color);
 }
+
+/* =========================
+   COUNTDOWN
+========================= */
+
+.countdown-card {
+  background:
+    linear-gradient(135deg,
+      #7f1d1d,
+      #b91c1c);
+
+  border-radius: 22px;
+
+  padding: 24px;
+
+  color: white;
+
+  text-align: center;
+
+  box-shadow:
+    0 10px 30px rgba(185, 28, 28, 0.3);
+}
+
+.countdown-card h3 {
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+}
+
+.countdown-grid {
+  display: flex;
+  gap: 16px;
+}
+
+.countdown-box {
+  flex: 1;
+
+  background:
+    rgba(255, 255, 255, 0.12);
+
+  border-radius: 18px;
+
+  padding: 18px;
+
+  backdrop-filter: blur(6px);
+}
+
+.countdown-box h1 {
+  font-size: 2.4rem;
+  margin-bottom: 6px;
+}
+
+.countdown-box span {
+  opacity: 0.9;
+}
+
+/* =========================
+   TIMINGS
+========================= */
 
 .timings-card h3 {
   display: flex;
   align-items: center;
   gap: 8px;
+
   color: var(--primary-dark);
+
   margin-bottom: 16px;
 }
 
@@ -57,8 +130,13 @@
 .timings-card li {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-color);
+
+  gap: 12px;
+
+  padding: 12px 0;
+
+  border-bottom:
+    1px solid var(--border-color);
 }
 
 .timings-card li:last-child {
@@ -71,7 +149,12 @@
 
 .timing-time {
   opacity: 0.7;
+  white-space: nowrap;
 }
+
+/* =========================
+   NOTIFICATIONS
+========================= */
 
 .notifications-section h3 {
   margin-bottom: 16px;
@@ -81,89 +164,80 @@
 .notification-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .notification-card {
   display: flex;
   gap: 16px;
+
   background: var(--card-bg);
+
   padding: 16px;
-  border-radius: 12px;
-  border-left: 4px solid var(--primary-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  border-radius: 18px;
+
+  border-left:
+    5px solid var(--primary-color);
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .notification-icon {
   color: var(--primary-color);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   margin-top: 4px;
 }
 
 .notification-content p {
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
   font-weight: 500;
+  line-height: 1.6;
 }
 
 .notification-date {
-  font-size: 0.75rem;
-  opacity: 0.6;
+  font-size: 0.78rem;
+  opacity: 0.65;
 }
 
-.visitor-card {
-  background: white;
-  padding: 20px;
-  border-radius: 18px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-top: 20px;
-}
-
-.visitor-card h3 {
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.visitor-card h1 {
-  font-size: 2.2rem;
-  color: #c62828;
-}
+/* =========================
+   VISITOR COUNT
+========================= */
 
 .visitor-card {
   display: flex;
-  gap: 15px;
-  margin-top: 20px;
+  gap: 16px;
 }
 
 .visit-box {
   flex: 1;
+
   background: white;
-  border-radius: 18px;
-  padding: 18px;
+
+  border-radius: 22px;
+
+  padding: 22px;
+
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .visit-box h3 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #666;
   margin-bottom: 10px;
 }
 
 .visit-box h1 {
-  font-size: 2rem;
+  font-size: 2.3rem;
   color: #d97706;
 }
 
-@media (max-width: 768px) {
-
-  .visitor-card {
-    flex-direction: column;
-  }
-}
-
 /* =========================
-   TEMPLE LOGO (WELCOME SECTION)
+   TEMPLE LOGO
 ========================= */
 
 .temple-logo-wrapper {
@@ -171,27 +245,30 @@
   justify-content: center;
   align-items: center;
 
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .temple-logo {
-  width: 90px;
-  height: 90px;
+  width: 95px;
+  height: 95px;
 
   object-fit: contain;
 
   border-radius: 50%;
+
   background: white;
 
   padding: 8px;
 
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.14);
 
-  animation: fadeInScale 0.6s ease-in-out;
+  animation:
+    fadeInScale 0.6s ease-in-out;
 }
 
-/* optional animation */
 @keyframes fadeInScale {
+
   from {
     opacity: 0;
     transform: scale(0.8);
@@ -201,4 +278,246 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* =========================
+   FESTIVAL POPUP
+========================= */
+/* =========================
+   FESTIVAL POPUP
+========================= */
+
+.festival-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.82);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999999;
+
+  padding: 16px;
+
+  backdrop-filter: blur(6px);
+
+  animation: fadeIn 0.3s ease;
+}
+
+.festival-popup {
+  position: relative;
+
+  width: 100%;
+  max-width: 750px;
+
+  animation: popupScale 0.35s ease;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.festival-popup-image {
+  width: 100%;
+  max-height: 92vh;
+
+  object-fit: contain;
+
+  border-radius: 24px;
+
+  display: block;
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+.festival-close-btn {
+  position: absolute;
+
+  top: -14px;
+  right: -14px;
+
+  width: 44px;
+  height: 44px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #fff;
+  color: #111;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 20px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  z-index: 1000000;
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35);
+
+  transition: all 0.2s ease;
+}
+
+.festival-close-btn:hover {
+  transform: scale(1.08);
+}
+
+@keyframes popupScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  .festival-popup {
+    max-width: 100%;
+  }
+
+  .festival-popup-image {
+    max-height: 85vh;
+    border-radius: 18px;
+  }
+
+  .festival-close-btn {
+    width: 40px;
+    height: 40px;
+
+    font-size: 18px;
+
+    top: -10px;
+    right: -10px;
+  }
+}
+
+.festival-close-btn:hover {
+  transform: scale(1.08);
+}
+
+/* =========================
+   MAP
+========================= */
+
+.map-section h3 {
+  margin-bottom: 12px;
+}
+
+.map-text {
+  margin-bottom: 14px;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.map-container {
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.map-btn {
+  margin-top: 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #b91c1c;
+  color: white;
+
+  padding: 12px 18px;
+
+  border-radius: 12px;
+
+  text-decoration: none;
+  font-weight: 600;
+
+  transition: 0.25s;
+}
+
+.map-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes popupFade {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popupScale {
+
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .visitor-card,
+  .countdown-grid {
+    flex-direction: column;
+  }
+
+  .festival-popup {
+    max-width: 96%;
+  }
+
+  .festival-close-btn {
+    width: 40px;
+    height: 40px;
+
+    top: -12px;
+    right: -12px;
+  }
+
+  .timings-card li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .timing-time {
+    margin-top: 4px;
+  }
+
+  .countdown-box h1 {
+    font-size: 2rem;
+  }
+
 }
