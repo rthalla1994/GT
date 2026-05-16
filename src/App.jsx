@@ -2,14 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 import Navbar from './components/Navbar';
+
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import Donations from './pages/Donations';
+import Expenses from './pages/Expenses';
+import Live from './pages/Live';
 
 import loaderImage from './assets/temple-loader.jpeg';
 import templeBell from './assets/temple-bell.mp3';
 
 function App() {
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
 
@@ -17,15 +21,18 @@ function App() {
   const hasPlayedRef = useRef(false);
 
   useEffect(() => {
+
     audioRef.current = new Audio(templeBell);
     audioRef.current.volume = 0.5;
 
     const playBell = () => {
+
       if (hasPlayedRef.current) return;
+
       hasPlayedRef.current = true;
 
       audioRef.current.play().catch((err) => {
-        console.log("Audio blocked:", err);
+        console.log(err);
       });
 
       if (navigator.vibrate) {
@@ -35,15 +42,24 @@ function App() {
       document.body.removeEventListener('pointerdown', playBell);
     };
 
-    // Try autoplay immediately (works if browser allows it)
     audioRef.current.play()
       .then(() => {
+
         hasPlayedRef.current = true;
-        if (navigator.vibrate) navigator.vibrate(200);
+
+        if (navigator.vibrate) {
+          navigator.vibrate(200);
+        }
+
       })
       .catch(() => {
-        // Autoplay blocked — wait for first user interaction instead
-        document.body.addEventListener('pointerdown', playBell, { once: true });
+
+        document.body.addEventListener(
+          'pointerdown',
+          playBell,
+          { once: true }
+        );
+
       });
 
     const timer = setTimeout(() => {
@@ -51,17 +67,30 @@ function App() {
     }, 3000);
 
     return () => {
+
       clearTimeout(timer);
-      document.body.removeEventListener('pointerdown', playBell);
+
+      document.body.removeEventListener(
+        'pointerdown',
+        playBell
+      );
+
     };
+
   }, []);
 
   if (loading) {
+
     return (
       <div className="splash-screen">
+
         <div className="overlay"></div>
 
-        <img src={loaderImage} alt="Temple" className="splash-image" />
+        <img
+          src={loaderImage}
+          alt="Temple"
+          className="splash-image"
+        />
 
         <h1 className="telugu-title">
           🙏 శ్రీ కుంటి గంగమ్మ జాతర 🙏
@@ -76,6 +105,7 @@ function App() {
         </p>
 
         <div className="loader"></div>
+
       </div>
     );
   }
@@ -89,14 +119,30 @@ function App() {
       />
 
       <main className="main-content">
+
         {activeTab === 'home' && <Home />}
+
         {activeTab === 'gallery' && <Gallery />}
+
         {activeTab === 'donations' && <Donations />}
+
+        {activeTab === 'expenses' && (
+          <Expenses />
+        )}
+        {activeTab === 'live' && <Live />}
+
       </main>
 
       <footer className="global-footer">
-        <p>© 2026 Sri Kunti Gangamma Temple Committee, Nallamgadu</p>
-        <span>Designed & Developed by Ravi Thalla</span>
+
+        <p>
+          © 2026 Sri Kunti Gangamma Temple Committee, Nallamgadu
+        </p>
+
+        <span>
+          Designed & Developed by Ravi Thalla
+        </span>
+
       </footer>
 
     </div>

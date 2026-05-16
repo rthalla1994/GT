@@ -3,6 +3,11 @@ import {
     FaImages,
     FaDonate
 } from 'react-icons/fa';
+import {
+  FaHandHoldingHeart,
+  FaWallet,
+  FaBroadcastTower
+} from 'react-icons/fa';
 
 import './Navbar.css';
 
@@ -32,6 +37,20 @@ const Navbar = ({ activeTab, setActiveTab }) => {
                 <FaDonate />
                 <span>Donations</span>
             </button>
+            <button
+  className={activeTab === 'expenses' ? 'active' : ''}
+  onClick={() => setActiveTab('expenses')}
+>
+  <FaWallet />
+  <span>Expenses</span>
+</button>
+<button
+  className={activeTab === 'live' ? 'active' : ''}
+  onClick={() => setActiveTab('live')}
+>
+  <FaBroadcastTower />
+  <span>Live</span>
+</button>
         </nav>
     );
 };

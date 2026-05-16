@@ -1,0 +1,140 @@
+.expenses-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.expense-summary-card {
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.expense-icon {
+  font-size: 42px;
+  color: #d35400;
+}
+
+.expense-summary-card h1 {
+  margin: 0;
+  color: #2d3436;
+}
+
+.expense-form-card,
+.expense-table-card,
+.expense-login-card {
+  background: white;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.expense-form input,
+.expense-form select,
+.expense-form textarea,
+.expense-login-card input {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+}
+
+.expense-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.expense-form button,
+.expense-login-card button {
+  border: none;
+  background: #d35400;
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.expense-table th,
+.expense-table td {
+  padding: 14px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.expense-table th {
+  background: #fff5ef;
+}
+
+.category-badge {
+  background: #ffe0cc;
+  color: #d35400;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.expense-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.expense-actions button {
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #f1f2f6;
+}
+
+.expense-login-card {
+  max-width: 420px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+
+  .expense-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .expense-summary-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+}
+.expense-export-btn {
+  margin-left: auto;
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.expense-export-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
